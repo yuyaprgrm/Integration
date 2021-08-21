@@ -1,0 +1,13 @@
+{
+    "name": "quietricefield/integration",
+    "description": "integration servers",
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "require": {
+        "textalk/websocket": "^1.5",
+        "pocketmine/pocketmine-mp": "^3.22"
+    }
+}

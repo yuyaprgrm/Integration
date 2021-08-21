@@ -1,0 +1,9 @@
+#DO NOT CHANGE THIS VALUE
+version: 1
+
+# Integration Websocket
+host: localhost
+port: 8080
+
+# Advanced
+#server-name: 鯖名の設定ができる(上限10文字)
