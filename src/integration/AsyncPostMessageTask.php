@@ -2,7 +2,7 @@
 
 namespace integration;
 
-require __DIR__ . '/../../vendor/autoload.php';
+
 
 use Exception;
 use pocketmine\scheduler\AsyncTask;
