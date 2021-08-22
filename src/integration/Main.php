@@ -6,6 +6,7 @@ use Exception;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\UUID;
 use raklib\protocol\Packet;
@@ -27,13 +28,19 @@ class Main extends PluginBase
     private AsyncGetMessageTask $asyncTask;
     private $webSocketServerProc;
 
+    private string $uuid;
+
     public function onLoad()
     {
         $this->saveDefaultConfig();
+        
+        $identification = new Config($this->getDataFolder().'identification.yml', Config::YAML);
 
-        if (!$this->getConfig()->exists('uuid')) {
-            $this->getConfig()->set('uuid', UUID::fromRandom()->toString());
+        if ($identification->get('uuid', null) == null) {
+            $identification->set('uuid', UUID::fromRandom()->toString());
+            $identification->save();
         }
+        $this->uuid = $identification->get('uuid');
 
         if (!$this->isConfigLatestVersion()) {
             $this->updateConfigFile();
@@ -69,7 +76,7 @@ class Main extends PluginBase
         $config = $this->getConfig();
         $host = $config->get('host');
         $port = $config->get('port');
-        $uuid = $config->get('uuid');
+        $uuid = $this->uuid;
         $servername = $config->get('server-name', null);
         $props = [
             'player-name' => $name,
@@ -86,7 +93,7 @@ class Main extends PluginBase
      */
     public function broadcastMessage(array $props): void
     {
-        if (!isset($props['uuid']) or $props['uuid'] == $this->getConfig()->get('uuid')) return;
+        if (!isset($props['uuid']) or $props['uuid'] == $this->uuid) return;
 
         if (!isset($props['player-name']) or !isset($props['message'])) return;
 
