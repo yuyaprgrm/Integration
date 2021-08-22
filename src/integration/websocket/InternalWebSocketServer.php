@@ -19,17 +19,17 @@ class InternalWebSocketServer implements MessageComponentInterface
         $this->clients = new SplObjectStorage;
     }
 
-    public function onOpen(ConnectionInterface $conn)
+    public function onOpen(ConnectionInterface $conn): void
     {
         $this->clients->attach($conn);
     }
 
-    public function onError(ConnectionInterface $conn, Exception $e)
+    public function onError(ConnectionInterface $conn, Exception $e):void
     {
         $conn->close();
     }
 
-    public function onMessage(ConnectionInterface $from, $msg)
+    public function onMessage(ConnectionInterface $from, $msg):void
     {
         foreach ($this->clients as $client) {
             if ($from !== $client) {
@@ -38,7 +38,7 @@ class InternalWebSocketServer implements MessageComponentInterface
         }
     }
 
-    public function onClose(ConnectionInterface $conn)
+    public function onClose(ConnectionInterface $conn):void
     {
         $this->clients->detach($conn);
     }

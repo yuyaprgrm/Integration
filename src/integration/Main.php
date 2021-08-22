@@ -26,6 +26,8 @@ class Main extends PluginBase
     const CONFIG_VERSION = 2;
 
     private AsyncGetMessageTask $asyncTask;
+
+    /** @var resource|bool $webSocketServerProc */
     private $webSocketServerProc;
 
     private string $uuid;
@@ -40,6 +42,7 @@ class Main extends PluginBase
             $identification->set('uuid', UUID::fromRandom()->toString());
             $identification->save();
         }
+
         $this->uuid = $identification->get('uuid');
 
         if (!$this->isConfigLatestVersion()) {
