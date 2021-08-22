@@ -112,12 +112,13 @@ class Main extends PluginBase
     private function updateConfigFile(): void
     {
         $config_array = $this->getConfig()->getAll();
-        unlink($this->getDataFolder().'config.yml');
-        $this->saveDefaultConfig();
+
+        var_dump($this->saveResource('config.yml', true));
+        $this->reloadConfig();
 
         foreach ($config_array as $key => $value) {
             $k = (string) $key;
-            if ($this->getConfig()->exists($k)) {
+            if ($k!='version' && $this->getConfig()->exists($k)) {
                 $this->getConfig()->set($k, $value);
             }
         }
