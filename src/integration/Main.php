@@ -19,13 +19,30 @@ class Main extends PluginBase
     }
 
 
+    /** System */
+    const CONFIG_VERSION = 2;
+
     private AsyncGetMessageTask $asyncTask;
 
     public function onLoad()
     {
         $this->saveDefaultConfig();
+        
         if(!$this->getConfig()->exists('uuid')){
             $this->getConfig()->set('uuid', UUID::fromRandom()->toString());
+        }
+
+        if(!$this->isConfigLatestVersion())
+        {
+            $this->updateConfigFile();
+        }
+
+        if($this->getConfig()->get('use-internal-websocket-server'))
+        {
+            $host = $this->getConfig()->get('host');
+            $port = $this->getConfig()->get('port');
+    
+            $this->startInternalWebsocketServer();
         }
         Main::$instance = $this;
     }
@@ -74,7 +91,30 @@ class Main extends PluginBase
 
     public function onDisable()
     {
-        $this->getConfig()->save();
+        $this->saveConfig();
         $this->asyncTask->close();
     }
+
+    private function isConfigLatestVersion()
+    {
+        return ($this->getConfig()->get('version', 0) == Main::CONFIG_VERSION);
+    }
+
+    private function updateConfigFile()
+    {
+        $config_array = $this->getConfig()->getAll();
+        unlink($this->getDataFolder().'Config.yml');
+        $this->saveDefaultConfig();
+
+        foreach($config_array as $key => $value)
+        {
+            if($this->getConfig()->exists($key))
+            {
+                $this->getConfig()->set($key, $value);
+            }
+        }
+
+        $this->saveConfig();
+    }
+
 }
