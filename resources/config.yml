@@ -1,9 +1,12 @@
 #DO NOT CHANGE THIS VALUE
-version: 1
+version: 2
 
 # Integration Websocket
 host: localhost
 port: 8080
+
+# Internal Server
+use-internal-websocket-server: true
 
 # Advanced
 #server-name: 鯖名の設定ができる(上限10文字)
