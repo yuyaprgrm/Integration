@@ -7,7 +7,7 @@ use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use MyApp\Chat;
 
-if(!isset($argv[0])) exit("no args");
+if(!isset($argv[1])) exit("no args");
 
 $port = (int) $argv[1];
     require __DIR__ . '/../../../vendor/autoload.php';
