@@ -2,6 +2,7 @@
 
 namespace integration;
 
+use Exception;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\AsyncTask;
@@ -13,7 +14,7 @@ class Main extends PluginBase
 
     private static Main $instance;
 
-    public static function getInstance():Main
+    public static function getInstance(): Main
     {
         return Main::$instance;
     }
@@ -23,26 +24,29 @@ class Main extends PluginBase
     const CONFIG_VERSION = 2;
 
     private AsyncGetMessageTask $asyncTask;
-    private AsyncInternalWebsocketServerTask $serverTask;
+    private $webSocketServerProc;
 
     public function onLoad()
     {
         $this->saveDefaultConfig();
-        
-        if(!$this->getConfig()->exists('uuid')){
+
+        if (!$this->getConfig()->exists('uuid')) {
             $this->getConfig()->set('uuid', UUID::fromRandom()->toString());
         }
 
-        if(!$this->isConfigLatestVersion())
-        {
+        if (!$this->isConfigLatestVersion()) {
             $this->updateConfigFile();
             $this->getLogger()->info('設定ファイルをアップデートしました');
         }
 
-        if($this->getConfig()->get('use-internal-websocket-server'))
-        {
-            $port = $this->getConfig()->get('port');
-            $this->startInternalWebsocketServer($port);
+        if ($this->getConfig()->get('use-internal-websocket-server')) {
+            try {
+                $port = $this->getConfig()->get('port');
+                $this->startInternalWebsocketServer($port);
+                $this->getLogger()->info("内部サーバーの起動完了");
+            } catch (\Exception $ex) {
+                $this->getLogger()->warning("内部サーバーの起動に失敗しました");
+            }
         }
 
         Main::$instance = $this;
@@ -79,21 +83,25 @@ class Main extends PluginBase
     /**
      * @param array<string, string> $props
      */
-    public function broadcastMessage(array $props) :void
+    public function broadcastMessage(array $props): void
     {
-        if(!isset($props['uuid']) or $props['uuid'] == $this->getConfig()->get('uuid'))return;
+        if (!isset($props['uuid']) or $props['uuid'] == $this->getConfig()->get('uuid')) return;
 
-        if(!isset($props['player-name']) or !isset($props['message']))return;
+        if (!isset($props['player-name']) or !isset($props['message'])) return;
 
         $serverName = $props['server-name'] ?? 'unknown';
         $this->getServer()->broadcastMessage("[{$serverName}]{$props['player-name']}: {$props['message']}");
-        
     }
 
     public function onDisable()
     {
         $this->saveConfig();
         $this->asyncTask->close();
+
+        if ($this->getConfig()->get('use-internal-websocket-server') && 
+            is_resource($this->webSocketServerProc)) {
+            proc_terminate($this->webSocketServerProc);
+        }
     }
 
     private function isConfigLatestVersion(): bool
@@ -107,11 +115,9 @@ class Main extends PluginBase
         unlink($this->getDataFolder().'config.yml');
         $this->saveDefaultConfig();
 
-        foreach($config_array as $key => $value)
-        {
+        foreach ($config_array as $key => $value) {
             $k = (string) $key;
-            if($this->getConfig()->exists($k))
-            {
+            if ($this->getConfig()->exists($k)) {
                 $this->getConfig()->set($k, $value);
             }
         }
@@ -121,5 +127,10 @@ class Main extends PluginBase
 
     private function startInternalWebsocketServer(int $port): void
     {
+        $this->webSocketServerProc = proc_open("php ./websocket/Boot.php ${port}", [], $pipes, __DIR__);
+
+        if (!is_resource($this->webSocketServerProc)) {
+            throw new \Exception('内部サーバー起動失敗');
+        }
     }
 }
