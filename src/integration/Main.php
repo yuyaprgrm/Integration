@@ -6,6 +6,7 @@ use Exception;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\utils\TextFormat;
 use pocketmine\utils\UUID;
 use raklib\protocol\Packet;
 
@@ -43,7 +44,7 @@ class Main extends PluginBase
             try {
                 $port = $this->getConfig()->get('port');
                 $this->startInternalWebsocketServer($port);
-                $this->getLogger()->info("内部サーバーの起動完了");
+                $this->getLogger()->info(TextFormat::AQUA."内部サーバーの起動完了:ポート${port}");
             } catch (\Exception $ex) {
                 $this->getLogger()->warning("内部サーバーの起動に失敗しました");
             }
