@@ -23,6 +23,7 @@ class Main extends PluginBase
     const CONFIG_VERSION = 2;
 
     private AsyncGetMessageTask $asyncTask;
+    private AsyncInternalWebsocketServerTask $serverTask;
 
     public function onLoad()
     {
@@ -35,15 +36,15 @@ class Main extends PluginBase
         if(!$this->isConfigLatestVersion())
         {
             $this->updateConfigFile();
+            $this->getLogger()->info('設定ファイルをアップデートしました');
         }
 
         if($this->getConfig()->get('use-internal-websocket-server'))
         {
-            $host = $this->getConfig()->get('host');
             $port = $this->getConfig()->get('port');
-    
-            $this->startInternalWebsocketServer();
+            $this->startInternalWebsocketServer($port);
         }
+
         Main::$instance = $this;
     }
 
@@ -95,26 +96,30 @@ class Main extends PluginBase
         $this->asyncTask->close();
     }
 
-    private function isConfigLatestVersion()
+    private function isConfigLatestVersion(): bool
     {
         return ($this->getConfig()->get('version', 0) == Main::CONFIG_VERSION);
     }
 
-    private function updateConfigFile()
+    private function updateConfigFile(): void
     {
         $config_array = $this->getConfig()->getAll();
-        unlink($this->getDataFolder().'Config.yml');
+        unlink($this->getDataFolder().'config.yml');
         $this->saveDefaultConfig();
 
         foreach($config_array as $key => $value)
         {
-            if($this->getConfig()->exists($key))
+            $k = (string) $key;
+            if($this->getConfig()->exists($k))
             {
-                $this->getConfig()->set($key, $value);
+                $this->getConfig()->set($k, $value);
             }
         }
 
         $this->saveConfig();
     }
 
+    private function startInternalWebsocketServer(int $port): void
+    {
+    }
 }
