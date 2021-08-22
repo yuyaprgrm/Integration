@@ -15,6 +15,16 @@ use WebSocket\TimeoutException;
 class AsyncGetMessageTask extends AsyncTask
 {
 
+    private string $host;
+    private int    $port;
+    private string $server_name;
+    private string $server_uuid;
+
+    private bool $closed;
+
+    /**
+     * @param array<string, string> $properties
+     */
     public function __construct(string $host, int $port, array $properties = []) {
         $this->host = $host;
         $this->port = $port;
@@ -55,7 +65,7 @@ class AsyncGetMessageTask extends AsyncTask
         Main::getInstance()->broadcastMessage(json_decode($msg_encoded, true));
     }
 
-    public function close()
+    public function close(): void
     {
         $this->closed = true;
     }

@@ -41,7 +41,7 @@ class Main extends PluginBase
         $this->postMessage("鯖", "§6§lオンラインになりました");
     }
 
-    public function postMessage(string $name, string $message)
+    public function postMessage(string $name, string $message): void
     {
         $config = $this->getConfig();
         $host = $config->get('host');
@@ -58,7 +58,10 @@ class Main extends PluginBase
         $this->getServer()->getAsyncPool()->submitTask(new AsyncPostMessageTask($host, $port, $props));
     }
 
-    public function broadcastMessage(array $props)
+    /**
+     * @param array<string, string> $props
+     */
+    public function broadcastMessage(array $props) :void
     {
         if(!isset($props['uuid']) or $props['uuid'] == $this->getConfig()->get('uuid'))return;
 

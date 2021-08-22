@@ -4,11 +4,21 @@ namespace integration;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
+use Exception;
 use pocketmine\scheduler\AsyncTask;
 use WebSocket\Client;
 
 class AsyncPostMessageTask extends AsyncTask
 {
+
+    private string $host;
+    private int    $port;
+    
+    private string $messageEncoded;
+
+    /**
+     * @param array<string, string> $properties
+     */
     public function __construct(string $host, int $port, array $properties = [])
     {
         $this->host = $host;
@@ -19,8 +29,12 @@ class AsyncPostMessageTask extends AsyncTask
             'uuid' => $properties['uuid'] ?? null,
             'server-name' => $properties['server-name'] ?? null
         ];
-        $this->messageEncoded = json_encode($message);
-        
+        if($messageEncoded = json_encode($message))
+        {
+            $this->messageEncoded = $messageEncoded;
+        }else{
+            throw new \Exception('Failed To Convert to Json');
+        }
     }
 
     public function onRun()
