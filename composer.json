@@ -10,6 +10,7 @@
         "textalk/websocket": "^1.5"
     },
     "require-dev": {
-        "pocketmine/pocketmine-mp": "^3.22"
+        "pocketmine/pocketmine-mp": "^3.22",
+        "phpstan/phpstan": "^0.12.96"
     }
 }
